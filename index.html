@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpinZone Pro | By Nizar Laoulaou</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#0f172a;
+color:white;
+text-align:center;
+}
+
+header{
+padding:15px;
+background:#111827;
+position:sticky;
+top:0;
+}
+
+section{
+max-width:900px;
+margin:auto;
+padding:20px;
+}
+
+.card{
+background:#1e293b;
+margin:20px auto;
+padding:20px;
+border-radius:15px;
+}
+
+input,button{
+padding:10px;
+margin:5px;
+border-radius:10px;
+border:none;
+width:80%;
+max-width:300px;
+}
+
+button{
+background:#3b82f6;
+color:white;
+cursor:pointer;
+font-weight:bold;
+}
+
+.result{
+margin-top:10px;
+font-weight:bold;
+}
+
+/* RUEDA CENTRADA */
+.wheel-container{
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+margin-top:10px;
+}
+
+canvas{
+background:#0b1220;
+border-radius:50%;
+}
+
+/* FLECHA */
+.arrow{
+width:0;
+height:0;
+border-top:20px solid transparent;
+border-bottom:20px solid transparent;
+border-left:40px solid white;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h2>🎡 SpinZone Pro</h2>
+</header>
+
+<section>
+
+<!-- RUEDA -->
+<div class="card">
+<h2>🎡 Ruleta</h2>
+
+<input id="choices" value="Pizza,Cine,Minecraft,Fútbol,Viajar">
+
+<br>
+<button onclick="buildWheel()">Actualizar</button>
+<button onclick="spin()">Girar</button>
+
+<div class="wheel-container">
+<canvas id="wheel" width="400" height="400"></canvas>
+<div class="arrow"></div>
+</div>
+
+<div id="wheelResult" class="result">Listo</div>
+</div>
+
+<!-- RANDOM NUMBER -->
+<div class="card">
+<h2>🔢 Number Generator</h2>
+
+<input type="number" id="min" placeholder="Min">
+<input type="number" id="max" placeholder="Max">
+
+<br>
+<button onclick="randomNumber()">Generar</button>
+
+<div id="randomResult" class="result"></div>
+</div>
+
+<!-- SUSCRIPCIÓN -->
+<div class="card">
+<h2>⭐ Suscripción</h2>
+
+<input type="email" id="email" placeholder="tu correo">
+
+<br>
+<button onclick="subscribe()">Suscribirse</button>
+
+<div id="subMessage" class="result"></div>
+</div>
+
+</section>
+
+<script>
+
+let canvas = document.getElementById("wheel");
+let ctx = canvas.getContext("2d");
+
+let options = [];
+let rotation = 0;
+let spinning = false;
+
+const colors = ["#ef4444","#f97316","#eab308","#22c55e","#06b6d4","#3b82f6","#8b5cf6"];
+
+window.onload = () => {
+buildWheel();
+};
+
+function buildWheel(){
+options = document.getElementById("choices")
+.value.split(",")
+.map(x => x.trim())
+.filter(Boolean);
+
+drawWheel();
+}
+
+function drawWheel(){
+
+ctx.clearRect(0,0,400,400);
+
+let cx=200, cy=200, r=180;
+let angle=(Math.PI*2)/options.length;
+
+options.forEach((text,i)=>{
+
+let start=i*angle;
+
+ctx.beginPath();
+ctx.moveTo(cx,cy);
+ctx.arc(cx,cy,r,start,start+angle);
+ctx.fillStyle=colors[i%colors.length];
+ctx.fill();
+
+ctx.save();
+ctx.translate(cx,cy);
+ctx.rotate(start+angle/2);
+ctx.fillStyle="white";
+ctx.font="14px Arial";
+ctx.fillText(text,r*0.55,0);
+ctx.restore();
+
+});
+
+// centro
+ctx.beginPath();
+ctx.arc(cx,cy,40,0,Math.PI*2);
+ctx.fillStyle="white";
+ctx.fill();
+}
+
+function spin(){
+
+if(spinning) return;
+
+spinning=true;
+
+let winner=Math.floor(Math.random()*options.length);
+let slice=360/options.length;
+let target=-(winner*slice)-slice/2;
+
+rotation+=3600+target;
+
+canvas.style.transition="transform 5s ease-out";
+canvas.style.transform=`rotate(${rotation}deg)`;
+
+setTimeout(()=>{
+spinning=false;
+document.getElementById("wheelResult").innerText="🎉 Gana: "+options[winner];
+},5000);
+}
+
+function randomNumber(){
+let min=+document.getElementById("min").value;
+let max=+document.getElementById("max").value;
+
+if(isNaN(min)||isNaN(max)) return;
+
+document.getElementById("randomResult").innerText=
+Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function subscribe(){
+let email=document.getElementById("email").value;
+
+document.getElementById("subMessage").innerText=
+email.includes("@") ? "✅ Suscrito correctamente" : "❌ Email inválido";
+}
+
+</script>
+
+</body>
+</html>
